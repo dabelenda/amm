@@ -16,7 +16,41 @@ def dependencies(start) {
   }
   sh "docker exec -i ${redis_container.id} ip route get 1 | awk '{print \$NF;exit}' > /tmp/ip "
   def hostip = readFile('/tmp/ip').trim()
-  
+  def accesskey = null
+  def secretkey = null
+  def username = null
+  def password = null
+  def rancher_env_id = null
+  def accred_password = null
+ 
+  withCredentials(
+    [[$class: 'UsernamePasswordMultiBinding',
+    credentialsId: 'amm-test-rancher-creds',
+    usernameVariable: 'ACCESSKEY',
+    passwordVariable: 'SECRETKEY']]
+  ) {
+    accesskey = "${ACCESSKEY}"
+    secretkey = "${SECRETKEY}"
+  }
+
+  withCredentials(
+    [[$class: 'UsernamePasswordMultiBinding',
+    credentialsId: 'ldap-test-credentials',
+    usernameVariable: 'USERNAME',
+    passwordVariable: 'PASSWORD']]
+  ) {
+    username = "${USERNAME}"
+    password = "${PASSWORD}"
+  }
+
+  withCredentials([string(credentialsId: 'amm-test-environment-id', variable: 'SECRET')]) {
+    rancher_env_id = "${SECRET}"
+  }
+
+  withCredentials([string(credentialsId: 'amm-accred-password', variable: 'SECRET')]) {
+    accred_password = "${SECRET}"
+  }
+
   // return array of arguments for docker run of image
   // can set links with other containers, etc
   return [
@@ -26,20 +60,20 @@ def dependencies(start) {
     "-e", "LDAP_USER_SEARCH_ATTR=uid",
     "-e", "CACHE_REDIS_LOCATION=redis://${hostip}:6379/1",
     "-e", "CACHE_REDIS_CLIENT_CLASS=django_redis.client.DefaultClient",
-    "-e", "TEST_USERNAME=test",
-    "-e", "TEST_CORRECT_PWD=test",
+    "-e", "TEST_USERNAME=${username}",
+    "-e", "TEST_CORRECT_PWD=${password}",
     "-e", "TEST_WRONG_PWD=test_wrong_pwd",
-    "-e", "SECRET_KEY=aslkdjflsajdlsakjlkjsfdajkfds",
+    "-e", "SECRET_KEY=dummy_value_since_it_is_not_important",
     "-e", "LDAP_USE_SSL=false",
     "-e", "DJANGO_WORKER_COUNT=1",
     "-e", "REST_API_ADDRESS=localhost",
-    "-e", "RANCHER_ACCESS_KEY=test",
-    "-e", "RANCHER_SECRET_KEY=test",
+    "-e", "RANCHER_ACCESS_KEY=${accesskey}",
+    "-e", "RANCHER_SECRET_KEY=${secretkey}",
     "-e", "RANCHER_VERIFY_CERTIFICATE=true",
     "-e", "RANCHER_API_URL=https://rancher.epfl.ch",
     "-e", "DJANGO_SETTINGS_MODULE=config.settings.local",
-    "-e", "AMM_ENVIRONMENT=test",
-    "-e", "ACCRED_PASSWORD=test",
+    "-e", "AMM_ENVIRONMENT=${rancher_env_id}",
+    "-e", "ACCRED_PASSWORD=${accred_password}",
   ]
 }
 
