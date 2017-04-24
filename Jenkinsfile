@@ -8,13 +8,14 @@ redis_container = null
 
 def dependencies(start) {
   if (start) {
-    redis_container = docker.image('redis').run()
     // Start dependencies for acceptance tests
+    redis_container = docker.image('redis').run()
+    sh "docker exec -i ${redis_container.id} ip route get 1 | awk '{print \$NF;exit}' > /tmp/ip "
   } else {
     // Stop depdencies for acceptance tests
     sh "docker rm -f ${redis_container.id}"
   }
-  sh "docker exec -i ${redis_container.id} ip route get 1 | awk '{print \$NF;exit}' > /tmp/ip "
+  
   def hostip = readFile('/tmp/ip').trim()
   def accesskey = null
   def secretkey = null
