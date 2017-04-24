@@ -21,7 +21,7 @@ def dependencies(start) {
   // can set links with other containers, etc
   return [
     "-e", "LDAP_BASE_DN=o=epfl,c=ch",
-    "-e", "LDAP_SERVER=ldap.epfl.ch",
+    "-e", "LDAP_SERVER=scoldap.epfl.ch",
     "-e", "LDAP_SERVER_FOR_SEARCH=ldap.epfl.ch",
     "-e", "LDAP_USER_SEARCH_ATTR=uid",
     "-e", "CACHE_REDIS_LOCATION=redis://${hostip}:6379/1",
