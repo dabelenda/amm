@@ -4,12 +4,19 @@
 @Library('epflidevelop') import ch.epfl.idevelop.container_pipeline
 pipeline = new ch.epfl.idevelop.container_pipeline()
 
+redis_container = null
+
 def dependencies(start) {
   if (start) {
+    redis_container = docker.image('redis').run('-p 6379:6379')
     // Start dependencies for acceptance tests
   } else {
     // Stop depdencies for acceptance tests
+    sh "docker rm -f ${redis_container.id}"
   }
+  sh "ip route get 1 | awk '{print \$NF;exit}' > /tmp/ip "
+  def hostip = readFile('/tmp/ip')
+  
   // return array of arguments for docker run of image
   // can set links with other containers, etc
   return [
@@ -17,7 +24,7 @@ def dependencies(start) {
     "-e", "LDAP_SERVER=ldap.epfl.ch",
     "-e", "LDAP_SERVER_FOR_SEARCH=ldap.epfl.ch",
     "-e", "LDAP_USER_SEARCH_ATTR=uid",
-    "-e", "CACHE_REDIS_LOCATION=redis://redis:6379/1",
+    "-e", "CACHE_REDIS_LOCATION=redis://${hostip}:6379/1",
     "-e", "CACHE_REDIS_CLIENT_CLASS=django_redis.client.DefaultClient",
     "-e", "TEST_USERNAME=test",
     "-e", "TEST_CORRECT_PWD=test",
