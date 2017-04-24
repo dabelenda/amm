@@ -16,8 +16,6 @@ def dependencies(start) {
   }
   sh "ip route get 1 | awk '{print \$NF;exit}' > /tmp/ip "
   def hostip = readFile('/tmp/ip').trim()
-  // sleep while redis is starting
-  sleep 3
   
   // return array of arguments for docker run of image
   // can set links with other containers, etc
@@ -53,6 +51,7 @@ def buildcoveragexml() {
 }
 
 def acceptancetests(container) {
+  sh "docker exec -i ${redis_container.id} echo foo"
   sh "docker exec -i ${container.id} pip install -r requirements/local.txt"
   sh "docker exec -i ${container.id} coverage run --source='.' src/manage.py test --settings=config.settings.local"
 }
