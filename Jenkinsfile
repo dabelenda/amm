@@ -8,13 +8,13 @@ redis_container = null
 
 def dependencies(start) {
   if (start) {
-    redis_container = docker.image('redis').run('-p 6379:6379')
+    redis_container = docker.image('redis').run()
     // Start dependencies for acceptance tests
   } else {
     // Stop depdencies for acceptance tests
     sh "docker rm -f ${redis_container.id}"
   }
-  sh "curl rancher-metadata/latest/self/host/agent_ip/ > /tmp/ip "
+  sh "docker exec -i ${redis_container.id} ip route get 1 | awk '{print \$NF;exit}' > /tmp/ip "
   def hostip = readFile('/tmp/ip').trim()
   
   // return array of arguments for docker run of image
