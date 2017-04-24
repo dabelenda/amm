@@ -51,7 +51,8 @@ def buildcoveragexml() {
 }
 
 def acceptancetests(container) {
-  sh "docker exec -i ${redis_container.id} echo foo"
+  sh "ip a"
+  sh "docker port ${redis_container.id}"
   sh "docker exec -i ${container.id} pip install -r requirements/local.txt"
   sh "docker exec -i ${container.id} coverage run --source='.' src/manage.py test --settings=config.settings.local"
 }
