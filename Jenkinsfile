@@ -12,7 +12,28 @@ def dependencies(start) {
   }
   // return array of arguments for docker run of image
   // can set links with other containers, etc
-  return []
+  return [
+    "-e", "LDAP_BASE_DN=o=epfl,c=ch",
+    "-e", "LDAP_SERVER=ldap.epfl.ch",
+    "-e", "LDAP_SERVER_FOR_SEARCH=ldap.epfl.ch",
+    "-e", "LDAP_USER_SEARCH_ATTR=uid",
+    "-e", "CACHE_REDIS_LOCATION=redis://redis:6379/1",
+    "-e", "CACHE_REDIS_CLIENT_CLASS=django_redis.client.DefaultClient",
+    "-e", "TEST_USERNAME=test",
+    "-e", "TEST_CORRECT_PWD=test",
+    "-e", "TEST_WRONG_PWD=test_wrong_pwd",
+    "-e", "SECRET_KEY=aslkdjflsajdlsakjlkjsfdajkfds",
+    "-e", "LDAP_USE_SSL=false",
+    "-e", "DJANGO_WORKER_COUNT=1",
+    "-e", "REST_API_ADDRESS=localhost",
+    "-e", "RANCHER_ACCESS_KEY=test",
+    "-e", "RANCHER_SECRET_KEY=test",
+    "-e", "RANCHER_VERIFY_CERTIFICATE=true",
+    "-e", "RANCHER_API_URL=https://rancher.epfl.ch",
+    "-e", "DJANGO_SETTINGS_MODULE=config.settings.local",
+    "-e", "AMM_ENVIRONMENT=test",
+    "-e", "ACCRED_PASSWORD=test",
+  ]
 }
 
 def unittest() {
