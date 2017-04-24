@@ -14,7 +14,7 @@ def dependencies(start) {
     // Stop depdencies for acceptance tests
     sh "docker rm -f ${redis_container.id}"
   }
-  sh "ip route get 1 | awk '{print \$NF;exit}' > /tmp/ip "
+  sh "curl rancher-metadata/latest/self/host/agent_ip/ > /tmp/ip "
   def hostip = readFile('/tmp/ip').trim()
   
   // return array of arguments for docker run of image
