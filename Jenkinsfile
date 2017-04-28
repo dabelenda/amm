@@ -75,6 +75,8 @@ def dependencies(start) {
     "-e", "DJANGO_SETTINGS_MODULE=config.settings.test",
     "-e", "AMM_ENVIRONMENT=${rancher_env_id}",
     "-e", "ACCRED_PASSWORD=${accred_password}",
+    "-e", "DJANGO_DEBUG=True",
+    "-e", "AMM_MYSQL_DOMAIN=",
   ]
 }
 
@@ -87,6 +89,10 @@ def buildcoveragexml() {
 def acceptancetests(container) {
   sh "docker exec -i ${container.id} pip install -r requirements/local.txt"
   sh "docker exec -i ${container.id} coverage run --source='.' src/manage.py test --settings=config.settings.test --exclude-tag=rancher"
+  sh "docker exec -i ${container.id} coverage xml"
+  sh "docker cp ${container.id}:/opt/amm/coverage.xml /tmp/coverage.xml"
+  sh "cp /tmp/coverage.xml coverage.xml"
+  step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml', failNoReports: false, failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
 }
 
 majorversion = 0
